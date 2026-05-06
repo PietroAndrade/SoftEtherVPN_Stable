@@ -365,49 +365,104 @@ namespace BuildUtil
 				throw new ApplicationException(string.Format("'{0}' is not a VPN base directory.", Paths.BaseDirName));
 			}
 
-			// Get the VC++ directory
-			// Visual Studio 2008
-			if (IntPtr.Size == 4)
+			// === Modern toolchain support (VS2026 / Win11 SDK) ===
+			// Original code below required VS2008 (VC9) + Windows SDK 6.0A and threw if absent.
+			// We now make those lookups tolerant: try the legacy registry, fall back to
+			// environment variables (VS_VC_DIR, WINDOWS_SDK_DIR, RC_EXE, MAKECAT_EXE, MSBUILD_EXE)
+			// and never throw — only the specific commands that actually need a missing path
+			// will fail at use-time, instead of blocking BuildUtil from starting at all.
+			Paths.VisualStudioVCDir = "";
+			try
 			{
-				Paths.VisualStudioVCDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Microsoft\VisualStudio\9.0\Setup\VC", "ProductDir"));
+				if (IntPtr.Size == 4)
+				{
+					Paths.VisualStudioVCDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Microsoft\VisualStudio\9.0\Setup\VC", "ProductDir"));
+				}
+				else
+				{
+					Paths.VisualStudioVCDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\9.0\Setup\VC", "ProductDir"));
+				}
+			}
+			catch { Paths.VisualStudioVCDir = ""; }
+
+			if (Str.IsEmptyStr(Paths.VisualStudioVCDir) || Directory.Exists(Paths.VisualStudioVCDir) == false)
+			{
+				string envVC = Environment.GetEnvironmentVariable("VS_VC_DIR");
+				if (!Str.IsEmptyStr(envVC) && Directory.Exists(envVC))
+				{
+					Paths.VisualStudioVCDir = envVC.EndsWith("\\") ? envVC : envVC + "\\";
+				}
+				else
+				{
+					Paths.VisualStudioVCDir = "";
+				}
+			}
+
+			// Get the VC++ batch file name (vcvarsall.bat). Optional — only used by full build pipeline.
+			if (!Str.IsEmptyStr(Paths.VisualStudioVCDir))
+			{
+				Paths.VisualStudioVCBatchFileName = Path.Combine(Paths.VisualStudioVCDir, "vcvarsall.bat");
 			}
 			else
 			{
-				Paths.VisualStudioVCDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\9.0\Setup\VC", "ProductDir"));
-			}
-			if (Str.IsEmptyStr(Paths.VisualStudioVCDir))
-			{
-				throw new ApplicationException("Visual C++ directory not found.\n");
-			}
-			if (Directory.Exists(Paths.VisualStudioVCDir) == false)
-			{
-				throw new ApplicationException(string.Format("Directory '{0}' not found.", Paths.VisualStudioVCDir));
-			}
-
-			// Get the VC++ batch file name
-			Paths.VisualStudioVCBatchFileName = Path.Combine(Paths.VisualStudioVCDir, "vcvarsall.bat");
-			if (File.Exists(Paths.VisualStudioVCBatchFileName) == false)
-			{
-				throw new ApplicationException(string.Format("File '{0}' not found.", Paths.VisualStudioVCBatchFileName));
+				Paths.VisualStudioVCBatchFileName = "";
 			}
 
 			bool x86_dir = false;
 
-			// Get Microsoft SDK 6.0a directory
-			if (IntPtr.Size == 4)
+			// Get Microsoft SDK directory — try legacy 6.0A first, then env var WINDOWS_SDK_DIR.
+			Paths.MicrosoftSDKDir = "";
+			try
 			{
-				Paths.MicrosoftSDKDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder"));
+				if (IntPtr.Size == 4)
+				{
+					Paths.MicrosoftSDKDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder"));
+				}
+				else
+				{
+					Paths.MicrosoftSDKDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder"));
+				}
+			}
+			catch { Paths.MicrosoftSDKDir = ""; }
+
+			if (Str.IsEmptyStr(Paths.MicrosoftSDKDir))
+			{
+				string envSDK = Environment.GetEnvironmentVariable("WINDOWS_SDK_DIR");
+				if (!Str.IsEmptyStr(envSDK))
+				{
+					Paths.MicrosoftSDKDir = envSDK.EndsWith("\\") ? envSDK : envSDK + "\\";
+				}
+			}
+
+			// rc.exe — env var RC_EXE wins. Otherwise build path from MicrosoftSDKDir.
+			string envRc = Environment.GetEnvironmentVariable("RC_EXE");
+			if (!Str.IsEmptyStr(envRc))
+			{
+				Paths.RcFilename = envRc;
+			}
+			else if (!Str.IsEmptyStr(Paths.MicrosoftSDKDir))
+			{
+				Paths.RcFilename = Path.Combine(Paths.MicrosoftSDKDir, @"bin\" + (x86_dir ? @"x86\" : "") + "rc.exe");
 			}
 			else
 			{
-				Paths.MicrosoftSDKDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder"));
+				Paths.RcFilename = "";
 			}
 
-			// Get makecat.exe file name
-			Paths.MakeCatFilename = Path.Combine(Paths.MicrosoftSDKDir, @"bin\" + (x86_dir ? @"x86\" : "") + "makecat.exe");
-
-			// Get the rc.exe file name
-			Paths.RcFilename = Path.Combine(Paths.MicrosoftSDKDir, @"bin\" + (x86_dir ? @"x86\" : "") + "rc.exe");
+			// makecat.exe — env var MAKECAT_EXE wins. Otherwise build path from MicrosoftSDKDir.
+			string envMakecat = Environment.GetEnvironmentVariable("MAKECAT_EXE");
+			if (!Str.IsEmptyStr(envMakecat))
+			{
+				Paths.MakeCatFilename = envMakecat;
+			}
+			else if (!Str.IsEmptyStr(Paths.MicrosoftSDKDir))
+			{
+				Paths.MakeCatFilename = Path.Combine(Paths.MicrosoftSDKDir, @"bin\" + (x86_dir ? @"x86\" : "") + "makecat.exe");
+			}
+			else
+			{
+				Paths.MakeCatFilename = "";
+			}
 
 			// Get the cmd.exe file name
 			Paths.CmdFileName = Path.Combine(Env.SystemDir, "cmd.exe");
@@ -416,14 +471,15 @@ namespace BuildUtil
 				throw new ApplicationException(string.Format("File '{0}' not found.", Paths.CmdFileName));
 			}
 
-			// Get .NET Framework 3.5 directory
+			// Get .NET Framework 3.5 directory (kept for backward compat with the legacy build pipeline)
 			Paths.DotNetFramework35Dir = Path.Combine(Env.WindowsDir, @"Microsoft.NET\Framework\v3.5");
 
-			// Get msbuild.exe directory
+			// Get msbuild.exe — prefer .NET 3.5 if present, else env var MSBUILD_EXE, else leave empty.
 			Paths.MSBuildFileName = Path.Combine(Paths.DotNetFramework35Dir, "MSBuild.exe");
 			if (File.Exists(Paths.MSBuildFileName) == false)
 			{
-				throw new ApplicationException(string.Format("File '{0}' not found.", Paths.MSBuildFileName));
+				string envMsbuild = Environment.GetEnvironmentVariable("MSBUILD_EXE");
+				Paths.MSBuildFileName = !Str.IsEmptyStr(envMsbuild) ? envMsbuild : "";
 			}
 
 			// Get the TMP directory
