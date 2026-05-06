@@ -7,7 +7,9 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+// afxres.h was provided by MFC. vpncmd is CLI-only and does not use MFC,
+// so include winres.h (subset of windows.h required by .rc files) instead.
+#include <winres.h>
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
