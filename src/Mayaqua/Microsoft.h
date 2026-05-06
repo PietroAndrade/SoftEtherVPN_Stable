@@ -285,6 +285,17 @@ typedef struct NETWORK_WIN32_FUNCTIONS
 
 
 #ifdef	MICROSOFT_C
+
+// EXTENDED_NAME_FORMAT and related SSPI types are needed by the GetUserNameExA/W
+// function-pointer typedefs below (around line ~459). Older Windows SDKs pulled
+// these in transitively via <windows.h> / <Ntsecapi.h>; the modern Win11 SDK
+// (10.0.26100+) does not, so include <security.h> explicitly. Defining
+// SECURITY_WIN32 selects the user-mode SSPI definitions.
+#ifndef SECURITY_WIN32
+#define SECURITY_WIN32
+#endif
+#include <security.h>
+
 // WCM related code on Windows 8
 typedef enum _MS_WCM_PROPERTY
 {

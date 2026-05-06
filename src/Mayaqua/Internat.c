@@ -2595,9 +2595,10 @@ UNI_TOKEN_LIST *UniParseToken(wchar_t *src, wchar_t *separator)
 	wchar_t *str1, *str2;
 	UINT len, num;
 
-#ifdef	OS_UNIX
+	// MSVC v145+ (VS2026) requires the 3-arg form of wcstok (C11). The legacy 2-arg
+	// version was removed. The original code only passed the context pointer on Unix;
+	// we now declare `state` unconditionally and always pass &state to wcstok.
 	wchar_t *state = NULL;
-#endif	// OS_UNIX
 
 	// Validate arguments
 	if (src == NULL)
@@ -2618,40 +2619,24 @@ UNI_TOKEN_LIST *UniParseToken(wchar_t *src, wchar_t *separator)
 
 	Lock(token_lock);
 	{
-		tmp = wcstok(str1, separator
-#ifdef	OS_UNIX
-			, &state
-#endif	// OS_UNIX
-			);
+		tmp = wcstok(str1, separator, &state);
 		num = 0;
 		while (tmp != NULL)
 		{
 			num++;
-			tmp = wcstok(NULL, separator
-#ifdef	OS_UNIX
-				, &state
-#endif	// OS_UNIX
-				);
+			tmp = wcstok(NULL, separator, &state);
 		}
 		ret = Malloc(sizeof(UNI_TOKEN_LIST));
 		ret->NumTokens = num;
 		ret->Token = (wchar_t **)Malloc(sizeof(wchar_t *) * num);
 		num = 0;
-		tmp = wcstok(str2, separator
-#ifdef	OS_UNIX
-			, &state
-#endif	// OS_UNIX
-			);
+		tmp = wcstok(str2, separator, &state);
 		while (tmp != NULL)
 		{
 			ret->Token[num] = (wchar_t *)Malloc((UniStrLen(tmp) + 1) * sizeof(wchar_t));
 			UniStrCpy(ret->Token[num], 0, tmp);
 			num++;
-			tmp = wcstok(NULL, separator
-#ifdef	OS_UNIX
-				, &state
-#endif	// OS_UNIX
-				);
+			tmp = wcstok(NULL, separator, &state);
 		}
 	}
 	Unlock(token_lock);
