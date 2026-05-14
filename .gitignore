@@ -1,0 +1,124 @@
+# =========================================================================
+# SoftEther VPN — gitignore for the modernized Windows build
+# =========================================================================
+# Captures build artifacts produced by Visual Studio 2026 / MSBuild and by
+# the C# BuildUtil .NET project. Pre-existing checked-in artifacts under
+# src/bin/hamcore/, src/bin/vpnweb.*, src/bin/lang.config and
+# src/bin/install_src.dat are explicitly NOT ignored.
+
+# -------------------------------------------------------------------------
+# Visual Studio scratch directories
+# -------------------------------------------------------------------------
+.vs/
+*.vcxproj.user
+*.suo
+*.ncb
+*.sln.docstates
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.userosscache
+UpgradeLog*.htm
+_UpgradeReport_Files/
+
+# Visual Studio Solution Explorer project filters (cosmetic, but track them
+# anyway so every dev sees the same Solution Explorer grouping). If your
+# team wants to ignore them instead, uncomment the line below.
+# *.vcxproj.filters
+
+# -------------------------------------------------------------------------
+# C / C++ intermediate output (per project, per config/platform)
+# -------------------------------------------------------------------------
+# Patterns target both Win32 and x64, Debug and Release. MSBuild writes
+# intermediate files under src/<project>/<Platform>_<Configuration>/.
+**/Win32_Debug/
+**/Win32_Release/
+**/x64_Debug/
+**/x64_Release/
+**/ARM64_Debug/
+**/ARM64_Release/
+
+# Generic C/C++ build output
+*.obj
+*.o
+*.tlog
+*.lastbuildstate
+*.unsuccessfulbuild
+*.exp
+*.ilk
+*.lib.recipe
+*.exe.recipe
+*.dll.recipe
+*.idb
+*.iobj
+*.ipdb
+
+# PDB / MAP — emitted by /DEBUG and /MAP linker flags
+*.pdb
+*.map
+
+# Resource compiler intermediates
+*.res
+*.aps
+
+# -------------------------------------------------------------------------
+# .NET / C# (BuildUtil)
+# -------------------------------------------------------------------------
+src/BuildUtil/obj/
+src/BuildUtil/bin/
+
+# -------------------------------------------------------------------------
+# Per-project debug output centralised under src/DebugFiles/ and the
+# scratch directory src/tmp/
+# -------------------------------------------------------------------------
+src/DebugFiles/
+src/tmp/
+
+# -------------------------------------------------------------------------
+# Build outputs that land in src/bin/. KEEP everything under hamcore/ and
+# the explicitly listed pre-existing artifacts.
+# -------------------------------------------------------------------------
+# Everything we build goes to src/bin/ root, so blacklist by extension:
+src/bin/*.exe
+src/bin/*.dll
+src/bin/*.pdb
+src/bin/*.exp
+src/bin/*.lib
+src/bin/*.map
+src/bin/BuildUtil*.config
+
+# Whitelist exceptions for pre-existing checked-in resources:
+!src/bin/vpnweb.cab
+!src/bin/vpnweb.ocx
+!src/bin/install_src.dat
+!src/bin/lang.config
+!src/bin/SOURCES_OF_BINARY_FILES.TXT
+!src/bin/hamcore/
+!src/bin/hamcore/**
+
+# -------------------------------------------------------------------------
+# Old VS project backups (some forks keep src/Backup/, src/<proj>/Backup/)
+# -------------------------------------------------------------------------
+src/Backup/
+**/Backup/
+
+# -------------------------------------------------------------------------
+# Build logs (from ci/build-*.ps1 Tee-Object or manual runs)
+# -------------------------------------------------------------------------
+*.log
+build-*.log
+
+# -------------------------------------------------------------------------
+# OS / editor noise
+# -------------------------------------------------------------------------
+Thumbs.db
+Desktop.ini
+.DS_Store
+*~
+*.swp
+*.bak
+
+# scripts/ is a local convenience folder for one-off helpers (not part of
+# the repo build); track only intentionally added scripts.
+scripts/

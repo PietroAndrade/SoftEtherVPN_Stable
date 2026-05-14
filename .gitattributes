@@ -1,0 +1,51 @@
+# Normalize line endings to LF in the repository. Each platform's checkout
+# converts to its native EOL based on core.autocrlf / core.eol settings.
+# This stops the ~30k-line CRLF/LF noise you get when checking out the
+# repo on Windows with default settings.
+
+* text=auto eol=lf
+
+# Force CRLF on files that Windows tooling expects with CRLF
+*.sln       text eol=crlf
+*.vcxproj   text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.csproj    text eol=crlf
+*.cmd       text eol=crlf
+*.bat       text eol=crlf
+*.ps1       text eol=crlf
+*.rc        text eol=crlf
+*.manifest  text eol=crlf
+
+# Force LF on Unix shell / makefile / service files
+*.sh        text eol=lf
+*.mak       text eol=lf
+Makefile    text eol=lf
+*.service   text eol=lf
+*.init      text eol=lf
+*.spec      text eol=lf
+configure   text eol=lf
+
+# Treat as binary (no diff, no EOL conversion)
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.bmp       binary
+*.pdf       binary
+*.exe       binary
+*.dll       binary
+*.sys       binary
+*.cat       binary
+*.ocx       binary
+*.cab       binary
+*.lib       binary
+*.obj       binary
+*.pdb       binary
+*.res       binary
+*.dat       binary
+*.stb       binary
+
+# Driver packages and binary blobs under hamcore are pre-built
+src/bin/hamcore/** -text
+src/BuildFiles/Library/** -text
