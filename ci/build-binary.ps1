@@ -1,26 +1,33 @@
 <#
 .SYNOPSIS
-    Build vpncmd_x64.exe from a clean SoftEtherVPN_Stable checkout.
+    Build a single SoftEther VPN binary on Windows with VS2026.
 
 .DESCRIPTION
-    Idempotent CI/local build script for the modernized VS2026 toolchain.
+    Idempotent CI/local build script. Works for any user-mode binary in
+    src/SEVPN.sln that has been ported to the modern toolchain (currently
+    vpncmd, vpnclient, vpncmgr; extend the validated list as new binaries
+    are ported).
 
     Performs:
       1. Locates Visual Studio 2026 (or any VS with v143+) via vswhere.
       2. Locates rc.exe / makecat.exe in the most recent Windows 11 SDK.
       3. Sets the env vars expected by the patched BuildUtil
          (RC_EXE, MAKECAT_EXE).
-      4. Cleans previous vpncmd intermediate artifacts to avoid
+      4. Cleans previous intermediate artifacts for the target to avoid
          PDB-server / multi-tool race conditions.
-      5. Invokes msbuild on src\SEVPN.sln targeting vpncmd Release|x64.
-      6. Verifies the binary exists and is executable.
+      5. Invokes msbuild on src/SEVPN.sln targeting the requested binary.
+      6. Verifies the binary exists and (optionally) smoke-tests it.
 
     Designed to run from a plain PowerShell prompt; it will resolve the
     MSBuild path itself and does not require Developer PowerShell.
 
+.PARAMETER Target
+    MSBuild target to build (matches the project name in SEVPN.sln).
+    Validated values: vpncmd, vpnclient, vpncmgr.
+
 .PARAMETER RepoRoot
     Path to the repository root. Defaults to the script's parent's parent
-    (i.e. assumes the script lives in <repo>/ci/).
+    (assumes the script lives in <repo>/ci/).
 
 .PARAMETER Configuration
     MSBuild configuration. Default: Release.
@@ -32,14 +39,26 @@
     Pass /p:DebugInformationFormat=None to skip PDB generation. Useful in
     CI to avoid mspdbsrv.exe race conditions. Default: $true.
 
+.PARAMETER SmokeTest
+    Run "<binary> /HELP" after build to verify the executable starts.
+    Only meaningful for CLI/console binaries; safe to disable for service
+    or GUI binaries (vpnclient, vpncmgr) that don't take CLI args.
+    Default: auto-detected based on Target.
+
 .PARAMETER Verbosity
     MSBuild /v: level. Default: minimal.
 
 .EXAMPLE
-    PS> .\ci\build-vpncmd.ps1
+    PS> .\ci\build-binary.ps1 -Target vpncmd
+    Builds vpncmd_x64.exe and runs /HELP smoke test.
 
 .EXAMPLE
-    PS> .\ci\build-vpncmd.ps1 -Configuration Release -Platform x64 -Verbosity normal
+    PS> .\ci\build-binary.ps1 -Target vpnclient -Verbosity normal
+    Builds vpnclient_x64.exe with verbose MSBuild output.
+
+.EXAMPLE
+    PS> .\ci\build-binary.ps1 -Target vpncmgr -SmokeTest:$false
+    Builds vpncmgr_x64.exe without smoke-testing (GUI app).
 
 .NOTES
     Exit codes:
@@ -51,19 +70,29 @@
 
 [CmdletBinding()]
 param(
+    [Parameter(Mandatory=$true)]
+    [ValidateSet('vpncmd','vpnclient','vpncmgr','vpnserver','vpnbridge','vpnsmgr','vpncmdsys','vpnbrand','vpndrvinst','vpninstall','vpnsetup')]
+    [string] $Target,
+
     [string] $RepoRoot      = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
     [string] $Configuration = 'Release',
     [string] $Platform      = 'x64',
     [bool]   $SkipPdb       = $true,
+    [Nullable[bool]] $SmokeTest = $null,
     [string] $Verbosity     = 'minimal'
 )
 
 $ErrorActionPreference = 'Stop'
 
+# Auto-detect smoke-test eligibility: CLI binaries respond to /HELP, others don't.
+if ($null -eq $SmokeTest) {
+    $SmokeTest = ($Target -in @('vpncmd', 'vpncmdsys'))
+}
+
 function Write-Step {
     param([string] $Message)
     Write-Host ""
-    Write-Host "==> $Message" -ForegroundColor Cyan
+    Write-Host "==> [$Target] $Message" -ForegroundColor Cyan
 }
 
 function Fail {
@@ -109,7 +138,6 @@ if (-not (Test-Path $sdkBinRoot)) {
     Fail 2 "Windows 11 SDK not found at $sdkBinRoot."
 }
 
-# Pick the highest-versioned SDK directory that has an x64 rc.exe
 $sdkVersion = Get-ChildItem $sdkBinRoot -Directory `
     | Where-Object { $_.Name -match '^10\.' } `
     | Sort-Object Name -Descending `
@@ -147,41 +175,44 @@ $sln = Join-Path $RepoRoot 'src\SEVPN.sln'
 if (-not (Test-Path $sln)) {
     Fail 2 "Solution not found: $sln (RepoRoot=$RepoRoot)"
 }
+$projDir = Join-Path $RepoRoot ("src\$Target")
+if (-not (Test-Path $projDir)) {
+    Fail 2 "Project directory not found: $projDir"
+}
 Write-Host "Solution:    $sln"
+Write-Host "Project dir: $projDir"
 
 # ---------------------------------------------------------------------------
-# 5. Clean previous vpncmd intermediate state to avoid PDB/MultiTool races
+# 5. Clean previous intermediate state to avoid PDB/MultiTool races
 # ---------------------------------------------------------------------------
-Write-Step "Cleaning previous vpncmd intermediate artifacts"
+Write-Step "Cleaning previous intermediate artifacts"
 
-# Stop any orphan PDB servers that could lock files
 Get-Process mspdbsrv -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 
-$intDir = Join-Path $RepoRoot ("src\vpncmd\{0}_{1}" -f $Platform, $Configuration)
+$intDir = Join-Path $projDir ("{0}_{1}" -f $Platform, $Configuration)
 if (Test-Path $intDir) {
     Remove-Item $intDir -Recurse -Force
     Write-Host "Removed: $intDir"
 }
 
 $exeArch = if ($Platform -eq 'x64') { 'x64' } else { 'x86' }
-$outExe = Join-Path $RepoRoot ("src\bin\vpncmd_{0}.exe" -f $exeArch)
+$outExe = Join-Path $RepoRoot ("src\bin\{0}_{1}.exe" -f $Target, $exeArch)
 if (Test-Path $outExe) {
     Remove-Item $outExe -Force
     Write-Host "Removed: $outExe"
 }
 
-# Pre-create dirs known to be touched by the build to dodge create-races
 New-Item -ItemType Directory -Force -Path (Join-Path $RepoRoot 'src\tmp\lib') | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $RepoRoot 'src\tmp\VersionResources') | Out-Null
 
 # ---------------------------------------------------------------------------
 # 6. Invoke msbuild
 # ---------------------------------------------------------------------------
-Write-Step "Building vpncmd ($Configuration | $Platform)"
+Write-Step "Building $Target ($Configuration | $Platform)"
 
 $msbuildArgs = @(
     $sln,
-    '/t:vpncmd',
+    "/t:$Target",
     "/p:Configuration=$Configuration",
     "/p:Platform=$Platform",
     "/v:$Verbosity",
@@ -210,20 +241,25 @@ if (-not (Test-Path $outExe)) {
 $item = Get-Item $outExe
 Write-Host ("Built: {0}  ({1:N0} bytes, {2})" -f $item.FullName, $item.Length, $item.LastWriteTime)
 
-# Smoke test: run /HELP and confirm it prints the BuildUtil banner.
-# /HELP exits with non-zero ("user canceled") which is normal — we only
-# check that the process started and produced output.
-try {
-    $help = & $outExe /HELP 2>&1 | Out-String
-    if ($help -match 'vpncmd' -or $help -match 'VPN') {
-        Write-Host "Smoke test:  OK (binary produced expected banner)"
-    } else {
-        Write-Host "Smoke test:  WARNING — output did not contain 'vpncmd' or 'VPN' banner"
+# ---------------------------------------------------------------------------
+# 8. (Optional) Smoke test
+# ---------------------------------------------------------------------------
+if ($SmokeTest) {
+    Write-Step "Smoke test (/HELP)"
+    try {
+        $help = & $outExe /HELP 2>&1 | Out-String
+        if ($help -match $Target -or $help -match 'VPN') {
+            Write-Host "Smoke test:  OK (binary produced expected banner)"
+        } else {
+            Write-Host "Smoke test:  WARNING - output did not match expected banner"
+        }
+    } catch {
+        Write-Host "Smoke test:  WARNING - could not execute binary: $_"
     }
-} catch {
-    Write-Host "Smoke test:  WARNING — could not execute binary: $_"
+} else {
+    Write-Host "Smoke test:  skipped (Target=$Target is not a CLI binary)"
 }
 
 Write-Host ""
-Write-Host "Build succeeded." -ForegroundColor Green
+Write-Host "[$Target] Build succeeded." -ForegroundColor Green
 exit 0

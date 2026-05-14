@@ -182,7 +182,13 @@ Precedence: `RC_EXE` env var → auto-discovered SDK → legacy `Microsoft SDK
 v6.0A` (rarely present) → empty (build will fail with a clear error if
 `rc.exe` is needed but not located).
 
-### 2.3 Build vpncmd (validated end-to-end)
+### 2.3 Build the desktop client runtime (validated)
+
+The three binaries needed for a SoftEther desktop VPN client installation
+are built by these commands. Drivers are not rebuilt (pre-signed `.sys`/
+`.cat` ship in `src/bin/hamcore/DriverPackages/`).
+
+#### 2.3.1 vpncmd — CLI
 
 ```powershell
 cd <repo-root>
@@ -193,18 +199,59 @@ msbuild src\SEVPN.sln /t:vpncmd `
   /v:minimal /nologo
 ```
 
-The artifact lands at `src\bin\vpncmd_x64.exe`.
+Output: `src\bin\vpncmd_x64.exe` (~6.9 MB). Smoke-test with
+`src\bin\vpncmd_x64.exe /HELP`.
 
-The `/p:DebugInformationFormat=None` flag is a workaround for a recurring PDB
-race condition; see [§5 Troubleshooting](#5-troubleshooting). Drop it once you
-have configured Defender exclusions or `mspdbsrv` serialization.
+#### 2.3.2 vpnclient — Windows service
+
+```powershell
+msbuild src\SEVPN.sln /t:vpnclient `
+  /p:Configuration=Release /p:Platform=x64 `
+  /p:DebugInformationFormat=None `
+  /v:minimal /nologo
+```
+
+Output: `src\bin\vpnclient_x64.exe` (~6.9 MB). Pulls in `VGate.dll` as
+a transitive dependency. Runs as a Windows service in production.
+
+#### 2.3.3 vpncmgr — Connection Manager GUI
+
+```powershell
+msbuild src\SEVPN.sln /t:vpncmgr `
+  /p:Configuration=Release /p:Platform=x64 `
+  /p:DebugInformationFormat=None `
+  /v:minimal /nologo
+```
+
+Output: `src\bin\vpncmgr_x64.exe` (~7.1 MB). Win32 GUI (no MFC).
+
+#### 2.3.4 Build all three at once
+
+```powershell
+.\ci\build-desktop-client.ps1
+```
+
+The CI helper script ([`ci/build-desktop-client.ps1`](ci/build-desktop-client.ps1))
+calls [`ci/build-binary.ps1`](ci/build-binary.ps1) for each target, prints
+a per-binary status table, and stops on the first failure (use
+`-ContinueOnError` to attempt all three regardless).
+
+#### 2.3.5 Notes on flags
+
+The `/p:DebugInformationFormat=None` flag is a workaround for a recurring
+PDB race condition; see [§5 Troubleshooting](#5-troubleshooting). Drop it
+once you have configured Defender exclusions or `mspdbsrv` serialization.
+
+`/v:minimal /nologo` keeps output short. Use `/v:normal` to see every
+file compiled (useful when debugging breakage).
 
 ### 2.4 Build everything (experimental)
 
 A full `msbuild src\SEVPN.sln /p:Configuration=Release /p:Platform=x64` is
-**not yet validated** — driver projects will fail without WDK, MFC projects
-will fail without the MFC component, and other user-mode binaries will need
-the same kind of patches `vpncmd` received. See [§4 Per-binary porting
+**not yet validated** — driver projects will fail without WDK, and the
+remaining user-mode binaries (`vpnserver`, `vpnbridge`, `vpnsmgr`,
+installer chain, etc.) will need the same per-binary patches the desktop
+client trio received. See [§4 Per-binary porting
 checklist](#4-per-binary-porting-checklist).
 
 ---
@@ -442,12 +489,26 @@ ctor will not throw. If you really need the legacy pipeline, set
 
 ## 6. CI / automation
 
-A reference PowerShell build script is provided at
-[`ci/build-vpncmd.ps1`](ci/build-vpncmd.ps1). It is idempotent, locates
-toolchain paths automatically via `vswhere`, and exits non-zero on failure.
+Two PowerShell helpers live under `ci/`:
 
-YAML examples for **GitHub Actions** and **Azure DevOps Pipelines** are in
-[`ci/README.md`](ci/README.md).
+- [`ci/build-binary.ps1`](ci/build-binary.ps1) — generic build script,
+  parameterized by `-Target` (`vpncmd`, `vpnclient`, `vpncmgr`, …).
+  Idempotent, locates toolchain via `vswhere`, runs an optional smoke
+  test, exits non-zero on failure.
+- [`ci/build-desktop-client.ps1`](ci/build-desktop-client.ps1) —
+  orchestrator that builds the three desktop-client binaries in sequence
+  and reports a per-binary status table.
+
+Local example:
+
+```powershell
+.\ci\build-binary.ps1 -Target vpnclient        # one binary
+.\ci\build-desktop-client.ps1                  # all three
+```
+
+YAML examples for **GitHub Actions** and **Azure DevOps Pipelines** are
+in [`ci/README.md`](ci/README.md), including a matrix-strategy variant
+that builds the three binaries in parallel jobs.
 
 ---
 

@@ -4,8 +4,8 @@ Reference scripts and pipeline templates for building SoftEther VPN
 binaries from this fork on Windows runners.
 
 The build prerequisites and patch context are documented in
-[`../BUILD_WINDOWS.md`](../BUILD_WINDOWS.md). This directory is only about
-reproducible automation.
+[`../BUILD_WINDOWS.md`](../BUILD_WINDOWS.md). This directory is only
+about reproducible automation.
 
 ---
 
@@ -13,12 +13,14 @@ reproducible automation.
 
 | File | Purpose |
 |---|---|
-| `build-vpncmd.ps1` | Idempotent PowerShell script that builds `vpncmd_x64.exe` end-to-end. Locates VS, SDK, sets env vars, cleans state, runs MSBuild, smoke-tests the output. Exit code 0 on success. |
+| `build-binary.ps1` | Idempotent PowerShell script that builds **one** binary by name. Locates VS, SDK, sets env vars, cleans state, runs MSBuild, smoke-tests CLI binaries. Exit code 0 on success. |
+| `build-desktop-client.ps1` | Orchestrator that builds the **three** desktop-client binaries (`vpncmd`, `vpnclient`, `vpncmgr`) by calling `build-binary.ps1` for each. Reports a final per-binary status table. |
 | `README.md` | This file. Pipeline templates and runner-setup notes. |
 
-When new binaries (`vpnserver`, `vpnclient`, …) are validated, add a
-matching `build-<binary>.ps1` next to `build-vpncmd.ps1` and reference it
-from the templates below.
+When new binaries (`vpnserver`, `vpnbridge`, …) are validated, just add
+their name to the `-Target` whitelist at the top of `build-binary.ps1`
+(it is already in the param `[ValidateSet]`) and a new orchestrator if
+you want grouped builds (e.g. `build-server-host.ps1`).
 
 ---
 
@@ -27,18 +29,31 @@ from the templates below.
 From a regular PowerShell prompt at the repository root:
 
 ```powershell
-.\ci\build-vpncmd.ps1
+# Build a single binary
+.\ci\build-binary.ps1 -Target vpncmd
+.\ci\build-binary.ps1 -Target vpnclient
+.\ci\build-binary.ps1 -Target vpncmgr
+
+# Or build the entire desktop client runtime in one shot
+.\ci\build-desktop-client.ps1
 ```
 
-You should not need to open Developer PowerShell — the script resolves
+You should not need to open Developer PowerShell — both scripts resolve
 toolchain paths via `vswhere`. Useful flags:
 
 ```powershell
 # More verbose MSBuild output
-.\ci\build-vpncmd.ps1 -Verbosity normal
+.\ci\build-binary.ps1 -Target vpnclient -Verbosity normal
 
 # Build with PDB (slower; risk of mspdbsrv races on weaker runners)
-.\ci\build-vpncmd.ps1 -SkipPdb $false
+.\ci\build-binary.ps1 -Target vpncmd -SkipPdb $false
+
+# GUI binary — explicitly skip the /HELP smoke test
+.\ci\build-binary.ps1 -Target vpncmgr -SmokeTest:$false
+# (this is also the default for non-CLI binaries)
+
+# Continue building remaining binaries even if one fails
+.\ci\build-desktop-client.ps1 -ContinueOnError
 ```
 
 ---
@@ -51,24 +66,24 @@ Whichever CI provider you use, the runner must have:
 - **Visual Studio 2026 Build Tools** (or full VS) with components:
   - MSVC v143+ x86/x64 build tools
   - Windows 11 SDK 10.0.26100+
-  - C++ ATL (and C++ MFC if you intend to build GUI binaries)
+  - C++ ATL (only required for `vpnweb` — skip for desktop client)
   - .NET Framework 4.8 SDK
 - **PowerShell 5.1+** (built into Windows)
 
 Microsoft-hosted runners (`windows-latest` on GitHub Actions, `windows-2022`
-on Azure DevOps) ship VS Enterprise with most of these components but not
-necessarily the v145 toolset. If a hosted runner is missing the right MSVC
-version, install via the VS Installer in a setup step, or use a
+on Azure DevOps) ship VS Enterprise with most components but not always
+the v145 toolset. If the build fails with "PlatformToolset v145 not
+found", install via the VS Installer in a setup step or use a
 self-hosted runner with VS2026 pre-installed.
 
 ---
 
 ## GitHub Actions
 
-`.github/workflows/build-vpncmd.yml`:
+`.github/workflows/build-desktop-client.yml`:
 
 ```yaml
-name: Build vpncmd
+name: Build SoftEther VPN desktop client
 
 on:
   push:
@@ -92,27 +107,42 @@ jobs:
           & $vswhere -latest -property installationPath
           & $vswhere -latest -property installationVersion
 
-      - name: Build vpncmd
+      - name: Build desktop client (vpncmd + vpnclient + vpncmgr)
         shell: pwsh
-        run: .\ci\build-vpncmd.ps1 -Verbosity minimal
+        run: .\ci\build-desktop-client.ps1
 
-      - name: Upload binary
+      - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: vpncmd-x64
-          path: src/bin/vpncmd_x64.exe
+          name: softether-desktop-client-x64
+          path: |
+            src/bin/vpncmd_x64.exe
+            src/bin/vpnclient_x64.exe
+            src/bin/vpncmgr_x64.exe
           if-no-files-found: error
           retention-days: 30
 ```
 
-Notes:
+If you prefer per-binary jobs (parallelism, faster failure):
 
-- `windows-latest` may need a setup step to install MSVC v145; if the build
-  fails with "PlatformToolset v145 not found", add a step using
-  [`microsoft/setup-msbuild`](https://github.com/microsoft/setup-msbuild)
-  or invoke the Visual Studio Installer to add the right component.
-- For private forks, prefer a **self-hosted runner** with VS2026 pre-baked
-  to keep build times under 2 minutes.
+```yaml
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [vpncmd, vpnclient, vpncmgr]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ${{ matrix.target }}
+        shell: pwsh
+        run: .\ci\build-binary.ps1 -Target ${{ matrix.target }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}-x64
+          path: src/bin/${{ matrix.target }}_x64.exe
+```
 
 ---
 
@@ -139,47 +169,45 @@ steps:
     displayName: 'Show toolchain'
     inputs:
       targetType: inline
+      pwsh: true
       script: |
         $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         & $vswhere -latest -property installationPath
         & $vswhere -latest -property installationVersion
 
   - task: PowerShell@2
-    displayName: 'Build vpncmd'
+    displayName: 'Build desktop client'
     inputs:
-      filePath: 'ci/build-vpncmd.ps1'
-      arguments: '-Verbosity minimal'
+      filePath: 'ci/build-desktop-client.ps1'
       pwsh: true
       failOnStderr: false   # MSBuild emits warnings on stderr legitimately
 
   - task: PublishPipelineArtifact@1
-    displayName: 'Publish vpncmd binary'
+    displayName: 'Publish desktop client binaries'
     inputs:
-      targetPath: 'src/bin/vpncmd_x64.exe'
-      artifactName: 'vpncmd-x64'
+      targetPath: 'src/bin'
+      artifactName: 'softether-desktop-client-x64'
 ```
 
 ---
 
-## Adding pipelines for new binaries
+## Adding a new binary
 
-When you finish porting `vpnserver` (or any other binary):
+When you finish porting another binary (e.g. `vpnserver`):
 
-1. Copy `build-vpncmd.ps1` to `build-vpnserver.ps1`.
-2. Replace the project target name (`/t:vpncmd` → `/t:vpnserver`) and the
-   expected output path (`vpncmd_x64.exe` → `vpnserver_x64.exe`).
-3. Tweak the smoke-test invocation if needed (services typically don't
-   support a `/HELP` flag the same way).
-4. Add a new step or job in the YAML that calls the new script and uploads
-   its artifact.
-5. Update the status table in [`../BUILD_WINDOWS.md`](../BUILD_WINDOWS.md).
+1. The `-Target` parameter of `build-binary.ps1` already has it in the
+   validated whitelist — just call it: `.\ci\build-binary.ps1 -Target vpnserver`.
+2. (Optional) Create a new orchestrator if you want grouped builds, e.g.
+   `build-server-host.ps1` calling `vpnserver`, `vpnbridge`, `vpnsmgr`.
+3. Add a CI YAML job/step or extend the matrix.
+4. Update the status table in [`../BUILD_WINDOWS.md`](../BUILD_WINDOWS.md).
 
 ---
 
 ## Self-hosted runner setup (optional)
 
-If hosted images are too slow or missing components, provision a Windows 11
-VM with:
+If hosted images are too slow or missing components, provision a
+Windows 11 VM with:
 
 ```powershell
 # As admin, after installing Windows 11
@@ -188,7 +216,6 @@ winget install --id Microsoft.VisualStudio.2026.Community --silent `
                 --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
                 --add Microsoft.VisualStudio.Component.Windows11SDK.26100 `
                 --add Microsoft.VisualStudio.Component.VC.ATL `
-                --add Microsoft.VisualStudio.Component.VC.ATLMFC `
                 --add Microsoft.NetCore.Component.Runtime.8.0 `
                 --add Microsoft.Net.Component.4.8.SDK `
                 --quiet --norestart"
