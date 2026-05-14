@@ -434,11 +434,53 @@ namespace BuildUtil
 				}
 			}
 
-			// rc.exe — env var RC_EXE wins. Otherwise build path from MicrosoftSDKDir.
+			// Auto-discover the latest Windows 10/11 SDK (Windows Kits 10).
+			// This is the preferred source on modern Win11 + VS2026 machines
+			// and removes the need to manually export RC_EXE / MAKECAT_EXE.
+			string autoDiscoveredRc = "";
+			string autoDiscoveredMakecat = "";
+			try
+			{
+				string[] kitsRoots = new[] {
+					@"C:\Program Files (x86)\Windows Kits\10\bin",
+					@"C:\Program Files\Windows Kits\10\bin",
+				};
+				foreach (string kitsRoot in kitsRoots)
+				{
+					if (!Directory.Exists(kitsRoot)) continue;
+					// Pick the highest-versioned subdir that contains x64\rc.exe.
+					string[] versions = Directory.GetDirectories(kitsRoot);
+					Array.Sort(versions);
+					Array.Reverse(versions);
+					foreach (string v in versions)
+					{
+						string candidateRc = Path.Combine(v, @"x64\rc.exe");
+						if (File.Exists(candidateRc))
+						{
+							autoDiscoveredRc = candidateRc;
+							string candidateMakecat = Path.Combine(v, @"x64\makecat.exe");
+							if (File.Exists(candidateMakecat))
+							{
+								autoDiscoveredMakecat = candidateMakecat;
+							}
+							break;
+						}
+					}
+					if (!Str.IsEmptyStr(autoDiscoveredRc)) break;
+				}
+			}
+			catch { /* swallow; fall through to env vars / legacy SDK */ }
+
+			// rc.exe — precedence: env var RC_EXE → auto-discovered Win10/11 SDK
+			//          → legacy MicrosoftSDKDir (SDK 6.0A) → empty.
 			string envRc = Environment.GetEnvironmentVariable("RC_EXE");
 			if (!Str.IsEmptyStr(envRc))
 			{
 				Paths.RcFilename = envRc;
+			}
+			else if (!Str.IsEmptyStr(autoDiscoveredRc))
+			{
+				Paths.RcFilename = autoDiscoveredRc;
 			}
 			else if (!Str.IsEmptyStr(Paths.MicrosoftSDKDir))
 			{
@@ -449,11 +491,15 @@ namespace BuildUtil
 				Paths.RcFilename = "";
 			}
 
-			// makecat.exe — env var MAKECAT_EXE wins. Otherwise build path from MicrosoftSDKDir.
+			// makecat.exe — same precedence as rc.exe.
 			string envMakecat = Environment.GetEnvironmentVariable("MAKECAT_EXE");
 			if (!Str.IsEmptyStr(envMakecat))
 			{
 				Paths.MakeCatFilename = envMakecat;
+			}
+			else if (!Str.IsEmptyStr(autoDiscoveredMakecat))
+			{
+				Paths.MakeCatFilename = autoDiscoveredMakecat;
 			}
 			else if (!Str.IsEmptyStr(Paths.MicrosoftSDKDir))
 			{
