@@ -11,9 +11,9 @@ the **Windows 11 SDK** on **Windows 11**, without the legacy WDK 7.1.
 | `Mayaqua` | static lib | Builds |
 | `Cedar` | static lib | Builds |
 | `vpncmd` | CLI exe | **Builds and runs** |
-| `vpnclient` | service exe | **Builds** (desktop client — high priority) |
-| `VGate` | user-mode DLL | **Builds** (transitive dep, validated via vpnclient) |
-| `vpncmgr` | GUI exe | Pending (desktop client — high priority) |
+| `vpnclient` | service exe | **Builds** (desktop client runtime ✓) |
+| `vpncmgr` | GUI exe | **Builds** (desktop client runtime ✓) |
+| `VGate` | user-mode DLL | **Builds** (transitive dep) |
 | `vpnserver` | service exe | Pending |
 | `vpnbridge` | service exe | Pending |
 | `vpnsmgr` | GUI exe | Pending |
