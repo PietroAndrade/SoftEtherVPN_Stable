@@ -1,0 +1,423 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PenCore.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PenCore.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Dummy.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Progress.avi">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="AboutBox.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Azure.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Azure.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="AzureCn.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="AzureJa.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="BMP_SW_TSUKUBA.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="BMP_UT.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Bridge.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Cascade.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="CascadeOffline.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="CascadeOffline2.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Cert.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="CertX.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="ClientBanner.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Coins.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="DateTime.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="DDNS.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Discard.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="DiscardDisable.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Display.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="EasyInstaller.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="EtherIP.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Farm.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Group.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="GroupDeny.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Hub.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Hub_Offline.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Ibaraki.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Information.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Installer.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Internet.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="InternetX.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="IPsec.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="IX2015.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Key.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="L2TP.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="LANG_CHINESE.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="LANG_ENGLISH.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="LANG_JAPANESE.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Language.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="License.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Link.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Link2.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Log.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Log2.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Machine.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="ManagerLogo.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Memory.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="New.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="NIC.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="NIC_Offline.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Null.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="OpenVPN.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="OpenVPN.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Pass.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="PassDisable.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Penguin.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="PKCS12.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Police.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Protocol.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Protocol2.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="ProtocolDhcp.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="ProtocolOffline.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Research.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Router.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="RouterBanner.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="RouterLogo.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Secure.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Secure.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Secure2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Secure3.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SELOGO49x49.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Server.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Server_Delete.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Server_Offline.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Server_Offline_Ex.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Server_Online_Ex.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="ServerCert.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SessionBridge.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SessionMonitor.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Setup.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="setup_1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="setup_2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SpecialListener.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SpecialListener.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SplashClient.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SplashLogger.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SplashManager.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SplashRouter.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SSTP.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Stop.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SW_LANG_1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SW_LANG_2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SW_LANG_3.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SW_SPLASH.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Switch.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SwitchOffline.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Test.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Test.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Tower.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Tray0.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Tray1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Tray2.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Tray3.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Tray4.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Tsukuba.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="UnivTsukuba.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Update.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="User.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="UserAdmin.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="UserDeny.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="VLan.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="VMBridge.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="VPN.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="VPNGateBanner.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="VPNGateEN.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="VPNGateJA.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="VPNServerFigure.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="VPNSvr.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Warning.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="WinPC.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="X.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="ZuruHam.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Zurukko.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Zurukko.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PenCore.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

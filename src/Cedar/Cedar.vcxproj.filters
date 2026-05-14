@@ -1,0 +1,477 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="winpcap">
+      <UniqueIdentifier>{4eb86b43-e0ab-46e6-afe1-50935482481d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Account.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Admin.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AzureClient.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AzureServer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Bridge.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BridgeUnix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BridgeWin32.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Cedar.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CedarPch.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CM.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Command.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Connection.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Console.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Database.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DDNS.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EM.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EtherLog.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hub.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Interop_OpenVPN.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Interop_SSTP.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IPsec.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IPsec_EtherIP.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IPsec_IKE.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IPsec_IkePacket.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IPsec_IPC.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IPsec_L2TP.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IPsec_PPP.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IPsec_Win7.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Link.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Listener.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Logging.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Nat.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NativeStack.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NM.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NullLan.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Protocol.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Radius.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Remote.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sam.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SecureInfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SecureNAT.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SeLowUser.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SM.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SW.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UdpAccel.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UT.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VG.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Virtual.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VLan.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VLanUnix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VLanWin32.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WaterMark.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WebUI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32Com.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinJumpList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinUi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Wpc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Account.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Admin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AzureClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AzureServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Bridge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BridgeUnix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BridgeWin32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cedar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CedarPch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CedarType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CMInner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Connection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Database.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DDNS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EMInner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EtherLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interop_OpenVPN.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interop_SSTP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPsec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPsec_EtherIP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPsec_IKE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPsec_IkePacket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPsec_IPC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPsec_L2TP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPsec_PPP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPsec_Win7.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPsec_Win7Inner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Link.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Logging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NMInner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NullLan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Radius.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Remote.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SecureInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SecureNAT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SeLowUser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SMInner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SW.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SWInner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UdpAccel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VG.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Virtual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VLan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VLanUnix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VLanWin32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterMark.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WebUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32Com.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinUi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wpc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\bittypes.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\bucket_lookup.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\count_packets.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\Devioctl.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\Gnuc.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\ip6_misc.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\memory_t.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\normal_lookup.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\Ntddndis.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\Ntddpack.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\Packet32.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\pcap-bpf.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\pcap-int.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\pcap-stdinc.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\pcap.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\pthread.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\remote-ext.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\sched.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\semaphore.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\tcp_session.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\time_calls.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\tme.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+    <ClInclude Include="WinPcap\Win32-Extensions.h">
+      <Filter>winpcap</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
