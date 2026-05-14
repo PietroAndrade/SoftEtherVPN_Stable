@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
-    <ProjectGuid>{83438AC3-5329-4337-89BC-5B69EBAE4B6E}</ProjectGuid>
-    <RootNamespace>vpncmd</RootNamespace>
+    <ProjectGuid>{1ED5782B-1734-4FC6-AA9E-F7181CDBA8A7}</ProjectGuid>
+    <RootNamespace>Ham</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -91,17 +91,12 @@
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
-    <!-- Link.OutputFile renames the binary to vpncmd_x64.exe; keep TargetName
-         in sync so $(TargetPath) (used by PreLink/PostBuild events such as
-         BuildUtil SetManifest) resolves to the actual file on disk. -->
-    <TargetName>vpncmd_x64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);$(SolutionDir)Mayaqua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>false</StringPooling>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling />
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -118,14 +113,18 @@
     </PreLinkEvent>
     <Link>
       <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)vpncmd.exe</OutputFile>
+      <OutputFile>$(OutDir)Ham.exe</OutputFile>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27x86%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(SolutionDir)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)DebugFiles\map\$(Platform)_$(Configuration)\$(ProjectName).map</MapFileName>
       <SubSystem>Console</SubSystem>
+      <StackReserveSize>100000</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <Profile>false</Profile>
     </Link>
     <PostBuildEvent>
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x86_user.manifest</Command>
@@ -137,9 +136,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);$(SolutionDir)Mayaqua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;CPU_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>false</StringPooling>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling />
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -156,14 +154,18 @@
     </PreLinkEvent>
     <Link>
       <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)vpncmd_x64.exe</OutputFile>
+      <OutputFile>$(OutDir)Ham_x64.exe</OutputFile>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27amd64%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(SolutionDir)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)DebugFiles\map\$(Platform)_$(Configuration)\$(ProjectName).map</MapFileName>
       <SubSystem>Console</SubSystem>
+      <StackReserveSize>100000</StackReserveSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
+      <Profile>false</Profile>
     </Link>
     <PostBuildEvent>
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x64_user.manifest</Command>
@@ -175,10 +177,9 @@
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);$(SolutionDir)Mayaqua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;VPN_SPEED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling />
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StructMemberAlignment>8Bytes</StructMemberAlignment>
@@ -195,18 +196,23 @@
     </PreLinkEvent>
     <Link>
       <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)vpncmd.exe</OutputFile>
+      <OutputFile>$(OutDir)Ham.exe</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft Visual Studio 8\VC\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27x86%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <DelayLoadDLLs>setupapi.dll;advapi32.dll;user32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(SolutionDir)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)DebugFiles\map\$(Platform)_$(Configuration)\$(ProjectName).map</MapFileName>
       <SubSystem>Console</SubSystem>
+      <StackReserveSize>100000</StackReserveSize>
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:SetPE4 "$(TargetPath)"
@@ -223,10 +229,9 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x86_u
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);$(SolutionDir)Mayaqua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;VPN_SPEED;CPU_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling />
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StructMemberAlignment>8Bytes</StructMemberAlignment>
@@ -243,35 +248,50 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x86_u
     </PreLinkEvent>
     <Link>
       <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)vpncmd_x64.exe</OutputFile>
+      <OutputFile>$(OutDir)Ham_x64.exe</OutputFile>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27amd64%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <DelayLoadDLLs>setupapi.dll;advapi32.dll;user32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(SolutionDir)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)DebugFiles\map\$(Platform)_$(Configuration)\$(ProjectName).map</MapFileName>
       <SubSystem>Console</SubSystem>
+      <StackReserveSize>100000</StackReserveSize>
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x64_user.manifest</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="vpncmd.c" />
+    <ClCompile Include="Ham.c" />
+    <ClCompile Include="Mon.c" />
+    <ClCompile Include="Scan.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Ham.h" />
+    <ClInclude Include="Mon.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Scan.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="vpncmd.ico" />
+    <Image Include="Cert.ico" />
+    <Image Include="NIC.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="vpncmd.rc" />
+    <ResourceCompile Include="Ham.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BuildUtil\BuildUtil.csproj">
+      <Project>{384815c3-333c-4cec-9dcd-b6ab2602ebb9}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\Cedar\Cedar.vcxproj">
       <Project>{2928d768-dec3-40d3-8e51-26e364497c9b}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

@@ -20,33 +20,33 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
-    <ProjectGuid>{83438AC3-5329-4337-89BC-5B69EBAE4B6E}</ProjectGuid>
-    <RootNamespace>vpncmd</RootNamespace>
+    <ProjectGuid>{ABAB0B91-91DD-4FF4-9773-18B37A820B9F}</ProjectGuid>
+    <RootNamespace>vpnbrand</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v145</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v145</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v145</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v145</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -91,22 +91,16 @@
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
-    <!-- Link.OutputFile renames the binary to vpncmd_x64.exe; keep TargetName
-         in sync so $(TargetPath) (used by PreLink/PostBuild events such as
-         BuildUtil SetManifest) resolves to the actual file on disk. -->
-    <TargetName>vpncmd_x64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>false</StringPooling>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling />
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <StructMemberAlignment>8Bytes</StructMemberAlignment>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -117,8 +111,8 @@
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res"</Command>
     </PreLinkEvent>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)vpncmd.exe</OutputFile>
+      <AdditionalDependencies>msi.lib;$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)vpnbrand.exe</OutputFile>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27x86%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(SolutionDir)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
@@ -139,12 +133,10 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;CPU_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>false</StringPooling>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling />
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <StructMemberAlignment>8Bytes</StructMemberAlignment>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -155,8 +147,8 @@
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res"</Command>
     </PreLinkEvent>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)vpncmd_x64.exe</OutputFile>
+      <AdditionalDependencies>msi.lib;$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)vpnbrand_x64.exe</OutputFile>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27amd64%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(SolutionDir)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
@@ -178,7 +170,6 @@
       <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;VPN_SPEED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling />
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StructMemberAlignment>8Bytes</StructMemberAlignment>
@@ -194,8 +185,8 @@
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res"</Command>
     </PreLinkEvent>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)vpncmd.exe</OutputFile>
+      <AdditionalDependencies>msi.lib;$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)vpnbrand.exe</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft Visual Studio 8\VC\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27x86%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <DelayLoadDLLs>setupapi.dll;advapi32.dll;user32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
@@ -226,7 +217,6 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x86_u
       <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;VPN_SPEED;CPU_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling />
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StructMemberAlignment>8Bytes</StructMemberAlignment>
@@ -242,8 +232,8 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x86_u
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res"</Command>
     </PreLinkEvent>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)vpncmd_x64.exe</OutputFile>
+      <AdditionalDependencies>msi.lib;$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)vpnbrand_x64.exe</OutputFile>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27amd64%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <DelayLoadDLLs>setupapi.dll;advapi32.dll;user32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -260,16 +250,17 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x86_u
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="vpncmd.c" />
+    <ClCompile Include="vpnbrand.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="vpnbrand.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="vpncmd.ico" />
+    <Image Include="vpnbrand.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="vpncmd.rc" />
+    <ResourceCompile Include="vpnbrand.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cedar\Cedar.vcxproj">
