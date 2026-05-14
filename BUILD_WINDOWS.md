@@ -5,19 +5,100 @@ upstream instructions assume **Visual Studio 2008 SP1** and the **Windows SDK
 6.0A**. This fork has been modernized to build on **Visual Studio 2026** with
 the **Windows 11 SDK** on **Windows 11**, without the legacy WDK 7.1.
 
-| Status (binary) | State |
-|---|---|
-| `BuildUtil` (.NET / C#) | Builds — runtime works |
-| `Mayaqua` (static lib) | Builds |
-| `Cedar` (static lib) | Builds |
-| `vpncmd` (CLI) | **Builds and runs** |
-| `vpnserver` | Not yet validated on this fork |
-| `vpnclient` | Not yet validated on this fork |
-| `vpnbridge` | Not yet validated on this fork |
-| `vpncmgr`, `vpnsmgr` (GUI, MFC) | Not yet validated; requires MFC component |
-| Driver projects (`Neo`, `Neo6`, `SeLow`, `Wfp`) | **Not built** — pre-signed binaries used from `src/bin/hamcore/DriverPackages/` |
+| Project | Type | State |
+|---|---|---|
+| `BuildUtil` | C# exe | Builds, runtime works |
+| `Mayaqua` | static lib | Builds |
+| `Cedar` | static lib | Builds |
+| `vpncmd` | CLI exe | **Builds and runs** |
+| `vpnclient` | service exe | **Builds** (desktop client — high priority) |
+| `VGate` | user-mode DLL | **Builds** (transitive dep, validated via vpnclient) |
+| `vpncmgr` | GUI exe | Pending (desktop client — high priority) |
+| `vpnserver` | service exe | Pending |
+| `vpnbridge` | service exe | Pending |
+| `vpnsmgr` | GUI exe | Pending |
+| `vpncmdsys` | service exe | Pending |
+| `vpnsetup` | exe | Pending (only for installer packaging) |
+| `vpndrvinst` | exe | Pending (only for installer packaging) |
+| `vpninstall` | exe | Pending (only for installer packaging) |
+| `vpnbrand` | exe | Pending (OEM rebranding tool) |
+| `PenCore` | user-mode DLL | Pending (no required consumer for desktop client) |
+| `Ham` | exe | Pending (internal cert/NIC utility) |
+| `vpnweb` | ATL OCX | Pending (legacy IE ActiveX — IE retired 2022) |
+| `Neo`, `Neo6`, `See`, `SeeDll`, `SeLow`, `Wfp` | kernel drivers | **Not built** — pre-signed `.sys`/`.cat` files in `src/bin/hamcore/DriverPackages/` are used at runtime; rebuilding requires WDK 7600 |
 
-If you extend this work to other binaries, please update this table.
+If you extend this work to other binaries, update this table.
+
+---
+
+## 0. What to build (by use case)
+
+The `.sln` contains 24 projects but very few are needed for any given use
+case. Pick the row that matches your goal and build only the listed
+projects.
+
+### 0.1 Desktop VPN client (most common)
+
+End-user installs SoftEther on a Windows PC to connect to an existing VPN
+server.
+
+| Build | Project | Purpose |
+|---|---|---|
+| Required | `vpnclient` | Background service that maintains tunnels |
+| Required | `vpncmgr` | Connection Manager GUI (the icon users click) |
+| Required | `vpncmd` ✓ | CLI for scripts and advanced config |
+| Auto | `VGate` | Library; pulled transitively by `vpnclient` |
+| Already shipped | Neo / Neo6 / SeLow drivers | Pre-signed `.sys` in `src/bin/hamcore/DriverPackages/` |
+
+For an internal deployment (GPO / Ansible / DSC), this set is sufficient.
+Use `pnputil` to register the drivers and `New-Service` to register
+`vpnclient` as a Windows service.
+
+For a packaged installer (`.exe` / `.msi`), additionally build:
+
+| Build | Project | Purpose |
+|---|---|---|
+| Optional | `vpndrvinst` | Driver-install helper invoked at first run |
+| Optional | `vpninstall` | Generic installer helper |
+| Optional | `vpnsetup` | Full setup wizard |
+
+### 0.2 VPN server / bridge host
+
+Operator hosts a SoftEther server or bridge.
+
+| Build | Project | Purpose |
+|---|---|---|
+| Required | `vpnserver` *or* `vpnbridge` | The service itself |
+| Required | `vpncmd` ✓ | CLI for management |
+| Recommended | `vpnsmgr` | Server Manager GUI |
+| Auto | `Cedar`, `Mayaqua`, `VGate` | Libraries pulled transitively |
+
+### 0.3 Anything else
+
+| Project | When to build |
+|---|---|
+| `vpnbrand` | Only if you need to apply a custom OEM brand to the binaries |
+| `vpncmdsys` | Service-mode wrapper of `vpncmd` (rarely needed standalone) |
+| `Ham` | SoftEther internal certificate / NIC utility (not user-facing) |
+| `vpnweb` | Legacy ActiveX for VPN-over-Internet-Explorer; **skip** — IE was retired in 2022 |
+| `PenCore` | Has no required consumer outside Cedar's optional build-order link; skip unless a future port requires it |
+| Driver projects | Only if you have WDK 7.1 + an EV cert + intent to re-sign through Microsoft Hardware Dev Center |
+
+### 0.4 Suggested porting order
+
+If you are progressively modernizing this fork, attack the binaries in
+this order — earlier ones unlock or de-risk later ones:
+
+1. **`vpnclient`** — first user-mode service; reuses every Cedar/Mayaqua patch already in place
+2. **`vpncmgr`** — first GUI; will surface any Win11 SDK breakage in Common Controls / shell APIs
+3. **`vpnserver`** + **`vpnbridge`** — server-side, near-twins of `vpnclient`
+4. **`vpnsmgr`** — second GUI, follows `vpncmgr`'s patches
+5. **Installer chain** (`vpndrvinst`, `vpninstall`, `vpnsetup`) — only if shipping packages
+6. The rest, on demand
+
+Each binary added should follow the [§4 Per-binary porting
+checklist](#4-per-binary-porting-checklist) and update the status table
+above.
 
 ---
 
@@ -35,9 +116,15 @@ Components):
 
 - **MSVC v143** or newer x64/x86 build tools (the projects target `v145`)
 - **Windows 11 SDK 10.0.26100** or newer
-- **C++ ATL** for the latest MSVC
-- **C++ MFC** for the latest MSVC *(only needed for `vpncmgr`, `vpnsmgr`)*
 - **.NET Framework 4.8 SDK** (targeting pack)
+- **C++ ATL** for the latest MSVC *(only needed for `vpnweb`, the legacy IE
+  ActiveX control — skip otherwise)*
+
+> **MFC is NOT required.** Despite the `#include "afxres.h"` boilerplate in
+> some `.rc` files (vestigial Visual Studio template noise), no project sets
+> `<UseOfMfc>` and the GUIs (`vpncmgr`, `vpnsmgr`) are built with raw Win32
+> + SoftEther's own UI framework. The `afxres.h` include is replaced with
+> `<winres.h>` per binary as those binaries are ported.
 
 To validate the install:
 
@@ -76,15 +163,24 @@ Adjust the version (`10.0.26100.0`) if a newer SDK is installed.
 Start menu → **"Developer PowerShell for VS 2026"** (preferably the **x64
 Native Tools** variant, so `LIB`/`INCLUDE` point at x64 libraries).
 
-### 2.2 Set environment variables
+### 2.2 (Optional) Override SDK paths
+
+`BuildUtil` auto-discovers the highest-versioned Windows 10/11 SDK under
+`C:\Program Files (x86)\Windows Kits\10\bin\` and uses its `x64\rc.exe`
+and `x64\makecat.exe`. **No environment variable setup is required on a
+standard Win11 + VS2026 machine.**
+
+You only need to set env vars to override the auto-discovered defaults
+(e.g. to pin a specific SDK version):
 
 ```powershell
-$env:RC_EXE      = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe"
-$env:MAKECAT_EXE = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\makecat.exe"
+$env:RC_EXE      = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\rc.exe"
+$env:MAKECAT_EXE = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\makecat.exe"
 ```
 
-These are read by the patched `BuildUtil` to substitute the legacy SDK 6.0A
-paths. They do not need to be persistent — only set in the build shell.
+Precedence: `RC_EXE` env var → auto-discovered SDK → legacy `Microsoft SDK
+v6.0A` (rarely present) → empty (build will fail with a clear error if
+`rc.exe` is needed but not located).
 
 ### 2.3 Build vpncmd (validated end-to-end)
 
@@ -187,12 +283,31 @@ typedefs) is no longer pulled in transitively by the Win11 SDK. Patch adds:
 Inside the `MICROSOFT_C` block, ensuring all consumers of that block see the
 type.
 
-### 3.6 vpncmd — replace `afxres.h`, sync TargetName, bridge legacy CRT
+### 3.6 Legacy CRT shim centralized in Mayaqua
 
-**Files:** `src/vpncmd/vpncmd.rc`, `src/vpncmd/vpncmd.vcxproj`,
-`src/vpncmd/legacy_iob_stub.c` (new)
+**File:** `src/Mayaqua/legacy_crt_shim.c` (new), referenced from
+`src/Mayaqua/Mayaqua.vcxproj`
 
-Three small changes specific to the `vpncmd` binary:
+A single compilation unit, baked into `Mayaqua.lib`, provides:
+
+- A definition of `__iob_func()` that returns a `FILE iob[3]` array backed
+  by the modern UCRT `__acrt_iob_func(0|1|2)` accessors. The pre-built
+  OpenSSL static libs in `src/BuildFiles/Library/` reference `__iob_func`,
+  which UCRT no longer exports.
+- A `#pragma comment(lib, "legacy_stdio_definitions.lib")` directive that
+  tells the linker to additionally include MSVC's compatibility lib. That
+  lib restores the pre-UCRT names `_vsnprintf`, `_vsnwprintf`, `sscanf`,
+  `_snprintf` etc. that the same OpenSSL libs reference.
+
+Because this is inside `Mayaqua.lib`, **every binary that links Mayaqua
+inherits the shim transparently** — no per-binary `.vcxproj` patches are
+required to resolve the legacy CRT symbols.
+
+### 3.7 vpncmd — replace `afxres.h`, sync TargetName
+
+**Files:** `src/vpncmd/vpncmd.rc`, `src/vpncmd/vpncmd.vcxproj`
+
+Two small changes specific to the `vpncmd` binary:
 
 - `vpncmd.rc`: `#include "afxres.h"` → `#include <winres.h>`. `vpncmd` is CLI
   and has no MFC dependency; the original include was a leftover from the VS
@@ -201,42 +316,44 @@ Three small changes specific to the `vpncmd` binary:
   so `$(TargetPath)` matches the `vpncmd_x64.exe` declared in `<OutputFile>`.
   Without this, `BuildUtil /CMD:SetManifest` (PostBuildEvent) fails to find
   the file.
-- `vpncmd.vcxproj` (Release|x64): added `legacy_stdio_definitions.lib` to
-  `<AdditionalDependencies>` to resolve `_vsnprintf`, `_vsnwprintf`, `sscanf`
-  symbols referenced by the **pre-built OpenSSL static libraries** (compiled
-  against the legacy CRT, before VS2015's UCRT split).
-- `legacy_iob_stub.c` (new): one-function shim that defines `__iob_func`
-  using the modern UCRT `__acrt_iob_func(0|1|2)` accessors. The legacy
-  OpenSSL libs reference `__iob_func` which the UCRT no longer provides.
 
-These three changes will need to be repeated **per binary** for `vpnserver`,
-`vpnclient`, `vpnbridge`. See [§4](#4-per-binary-porting-checklist).
+These two changes will need to be repeated **per binary** for `vpnclient`,
+`vpncmgr`, `vpnserver`, `vpnbridge`, `vpnsmgr`. See
+[§4](#4-per-binary-porting-checklist).
 
 ---
 
 ## 4. Per-binary porting checklist
 
-When porting another user-mode binary (e.g., `vpnserver`), expect to repeat
-the `vpncmd` recipe:
+When porting another user-mode binary, expect to repeat the `vpncmd`
+recipe. With the centralized CRT shim in Mayaqua (§3.6), there are now
+only two mandatory steps per binary:
 
-1. **`<binary>.rc`**: if it uses `afxres.h` and the binary is not a GUI/MFC
-   app, replace with `<winres.h>`. If it IS an MFC app, install the **C++
-   MFC** component instead.
-2. **`<binary>.vcxproj`**: ensure `<TargetName>` matches `<OutputFile>` for
-   each `$(Configuration)|$(Platform)` you intend to build.
-3. **`<binary>.vcxproj`**: add `legacy_stdio_definitions.lib` to
-   `<AdditionalDependencies>` and include `legacy_iob_stub.c` in
-   `<ClCompile>` items. (Or move both to `Mayaqua` so they're inherited
-   transparently — recommended once more than one binary needs them.)
-4. **Source code**: expect to find more places where:
-   - A Windows SDK header that worked transitively no longer does
-   - A deprecated CRT function (`strcpy`, `gets`, etc.) needs `_s` variant or `_CRT_SECURE_NO_WARNINGS`
-   - A 32-bit pointer truncation warning becomes an error under `/W4 /WX`
-5. **Pre-build/post-build events**: verify `BuildUtil /CMD:...` invocations
-   resolve `$(TargetPath)` correctly.
+1. **`<binary>.rc`**: replace `#include "afxres.h"` with
+   `#include <winres.h>` if the binary does not actually use MFC. (No
+   SoftEther binary truly uses MFC — they all use raw Win32.)
+2. **`<binary>.vcxproj`**: ensure `<TargetName>` matches `<OutputFile>`
+   for each `$(Configuration)|$(Platform)` you intend to build. For
+   example, if `<OutputFile>` is `vpnclient_x64.exe`, add
+   `<TargetName>vpnclient_x64</TargetName>` to the matching
+   `<PropertyGroup>`.
 
-Keep updating the status table at the top of this file as binaries are
-validated.
+The legacy CRT symbols (`__iob_func`, `_vsnprintf`, etc.) are resolved
+automatically because every binary links `Mayaqua.lib`.
+
+Additionally, expect to surface during compile/link:
+
+- A Windows SDK header that worked transitively no longer does (add
+  the explicit `#include`)
+- A deprecated CRT function (`strcpy`, `gets`, etc.) needing `_s`
+  variant or `_CRT_SECURE_NO_WARNINGS`
+- 32-bit pointer truncation warnings (C4311 / C4312) — typically
+  harmless on x64, can be left as warnings
+- `BuildUtil /CMD:...` pre/post-build event failures when
+  `$(TargetPath)` does not resolve to the real output file
+
+Keep updating the status table at the top of this file as binaries
+are validated.
 
 ---
 
@@ -268,27 +385,29 @@ msbuild ... /p:DebugInformationFormat=None
 **Cause:** Pre-built OpenSSL libs (`src/BuildFiles/Library/`) were compiled
 against the legacy CRT (msvcrt). Modern UCRT does not export these symbols.
 
-**Fix:** Ensure the binary's `.vcxproj` includes:
+**Fix:** This is already handled centrally by
+`src/Mayaqua/legacy_crt_shim.c` (compiled into `Mayaqua.lib`). If you see
+this error, verify:
 
-```xml
-<Link>
-  <AdditionalDependencies>legacy_stdio_definitions.lib;...</AdditionalDependencies>
-</Link>
-<ItemGroup>
-  <ClCompile Include="legacy_iob_stub.c" />
-</ItemGroup>
-```
+- The binary's `.vcxproj` actually has a `<ProjectReference>` to
+  `Mayaqua.vcxproj`. Without it, the shim is not linked in.
+- The Mayaqua build picked up `legacy_crt_shim.c` (`<ClCompile Include="legacy_crt_shim.c" />` in `Mayaqua.vcxproj`).
+- The MSVC `legacy_stdio_definitions.lib` is discoverable via the
+  current `LIB` env (set automatically by `vswhere`-resolved MSBuild).
 
 The proper long-term fix is to **rebuild OpenSSL with VS2026** and replace
-the binaries in `src/BuildFiles/Library/{Win32,x64}_{Debug,Release}/`.
+the binaries in `src/BuildFiles/Library/{Win32,x64}_{Debug,Release}/`. Once
+that is done, remove `legacy_crt_shim.c` from `Mayaqua.vcxproj`.
 
 ### 5.3 `cannot open include file 'afxres.h'`
 
-**Cause:** Resource script references MFC header without the MFC component
-installed.
+**Cause:** Resource script references the MFC `afxres.h` header. SoftEther
+binaries do not actually use MFC; this include is template boilerplate left
+over from old Visual Studio resource editors.
 
-**Fix (CLI/service binary):** Replace with `#include <winres.h>`.
-**Fix (real GUI/MFC binary):** Install **C++ MFC** in VS Installer.
+**Fix:** Replace with `#include <winres.h>` (the lightweight subset that
+only pulls in the resource constants `.rc` scripts actually need). This is
+the same patch that was applied to `vpncmd.rc`.
 
 ### 5.4 `error C2122: 'TYPE': invalid prototype parameter name list`
 
