@@ -487,6 +487,56 @@ ctor will not throw. If you really need the legacy pipeline, set
 
 ---
 
+### 5.7 `NicCreate` fails with `Error code: 31` after build succeeds
+
+This is a **runtime** failure, not a build error, but it is the most
+common "I built everything but cannot use the client" surprise so it is
+documented here for visibility.
+
+The GUI shows *"Installation of the Virtual Network Adapter device driver
+failed"*; `vpncmd ... NicCreate VPN` prints `Error code: 31`.
+
+**Cause:** On Windows 11 24H2 and later, HVCI / Memory Integrity is
+enabled by default and refuses to load the pre-signed `Neo6` virtual-NIC
+driver shipped under `src/bin/hamcore/DriverPackages/`. The driver staging
+step (`pnputil /add-driver /install` invoked by `ci/install-local.ps1
+-InstallDriver`) succeeds and the package shows up in `pnputil /enum-drivers`
+with `Provider: SoftEther Corporation`, but the actual *device instance*
+creation at `NicCreate` time fails because the kernel HVCI policy rejects
+the signature.
+
+**Detect:**
+
+```powershell
+$mi = Get-CimInstance Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard
+"  HVCI active? $(if (2 -in $mi.SecurityServicesRunning) { YES — blocking } else { no })"
+```
+
+**Fix (admin PS, requires reboot):**
+
+```powershell
+# Disable HVCI via registry (same effect as the Windows Security GUI toggle).
+Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity `
+                 -Name Enabled -Value 0
+Restart-Computer
+```
+
+After reboot, re-run `NicCreate VPN` (no need to reinstall anything — the
+driver is already in the store). To re-enable HVCI later, set `-Value 1`
+and reboot again.
+
+**Long-term proper fix:** re-sign the Neo6 driver with an EV code-signing
+certificate via the Microsoft Hardware Attestation Portal. The resulting
+signature is HVCI-compatible and survives default Windows 11 24H2+
+installations without any user-side mitigation. Tracked separately from
+this build-modernization work.
+
+UX-facing version of this same note (intended for end users running
+distributed binaries) lives in
+[`../RUN_WINDOWS.md`](../RUN_WINDOWS.md), section "Caveats and pitfalls".
+
+---
+
 ## 6. CI / automation
 
 Two PowerShell helpers live under `ci/`:

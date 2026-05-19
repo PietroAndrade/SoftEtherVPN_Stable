@@ -163,10 +163,30 @@ If you hit a new error, it's almost always one of:
   calls — the runtime executables fall back to reading the unpacked
   `src/bin/hamcore/` directory. For a packaged distribution you'd need
   `BuildUtil.exe /CMD:BuildHamcore` (not yet validated under VS2026).
-- **Driver signing on Win11 24H2+**: HVCI / Memory Integrity may block
-  the pre-signed `Neo6` driver when end-users install it. Mitigation
-  is documented in [`RUN_WINDOWS.md`](RUN_WINDOWS.md) — usually means
-  temporarily disabling Memory Integrity.
+- **Driver signing on Win11 24H2+**: HVCI / Memory Integrity refuses to
+  load the pre-signed `Neo6` driver because its signature uses the legacy
+  SoftEther cross-cert chain. Symptom: `vpncmd ... NicCreate VPN` returns
+  `Error code: 31` ("Installation of the Virtual Network Adapter device
+  driver failed"), same as the GUI button. The pnputil staging step
+  succeeds and the driver appears in the store, but the runtime device
+  instance creation is what HVCI blocks.
+
+  Detect:
+  ```powershell
+  $mi = Get-CimInstance Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard
+  if (2 -in $mi.SecurityServicesRunning) { "HVCI is ON — blocking Neo6" }
+  ```
+
+  Mitigation (admin PS, single reboot required):
+  ```powershell
+  Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity' \
+                   -Name Enabled -Value 0
+  Restart-Computer
+  ```
+  After reboot the same `NicCreate VPN` succeeds. Re-enable later with
+  `-Value 1`. Long-term fix is re-signing Neo6 with an EV cert via the
+  Microsoft Hardware Attestation Portal — separate workstream. UX-side
+  walkthrough in [`RUN_WINDOWS.md`](RUN_WINDOWS.md).
 - **Binaries are unsigned**. SmartScreen warns on first run for any
   end-user deployment. Code-signing for production would require an
   Authenticode certificate.
