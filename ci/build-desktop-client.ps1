@@ -43,7 +43,7 @@
 
 [CmdletBinding()]
 param(
-    [string] $RepoRoot      = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
+    [string] $RepoRoot      = '',
     [string] $Configuration = 'Release',
     [string] $Platform      = 'x64',
     [switch] $ContinueOnError
@@ -51,7 +51,15 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$buildBinary = Join-Path $PSScriptRoot 'build-binary.ps1'
+# Resolve script-relative paths from the script's location at runtime.
+# $PSScriptRoot is unreliable in param-block defaults under
+# `powershell -File ...` (PS 5.x quirk); $PSCommandPath always works.
+$scriptDir = Split-Path -Parent $PSCommandPath
+if ([string]::IsNullOrEmpty($RepoRoot)) {
+    $RepoRoot = (Resolve-Path (Join-Path $scriptDir '..')).Path
+}
+
+$buildBinary = Join-Path $scriptDir 'build-binary.ps1'
 if (-not (Test-Path $buildBinary)) {
     Write-Host "ERROR: ci/build-binary.ps1 not found at $buildBinary" -ForegroundColor Red
     exit 2
