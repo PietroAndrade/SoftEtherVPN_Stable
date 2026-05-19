@@ -71,10 +71,10 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet('vpncmd','vpnclient','vpncmgr','vpnserver','vpnbridge','vpnsmgr','vpncmdsys','vpnbrand','vpndrvinst','vpninstall','vpnsetup')]
+    [ValidateSet('vpncmd','vpnclient','vpncmgr','vpnserver','vpnbridge','vpnsmgr','vpncmdsys','vpnbrand','vpndrvinst','vpninstall','vpnsetup','PenCore')]
     [string] $Target,
 
-    [string] $RepoRoot      = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
+    [string] $RepoRoot      = '',
     [string] $Configuration = 'Release',
     [string] $Platform      = 'x64',
     [bool]   $SkipPdb       = $true,
@@ -83,6 +83,15 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# Resolve $RepoRoot from the script's own location if the caller didn't override.
+# Done here (not in the param default) because $PSScriptRoot is unreliable in
+# param-block defaults when launched via `powershell -File ...` under PS 5.x.
+# $PSCommandPath is always set to the absolute path of the running script.
+if ([string]::IsNullOrEmpty($RepoRoot)) {
+    $scriptDir = Split-Path -Parent $PSCommandPath
+    $RepoRoot  = (Resolve-Path (Join-Path $scriptDir '..')).Path
+}
 
 # Auto-detect smoke-test eligibility: CLI binaries respond to /HELP, others don't.
 if ($null -eq $SmokeTest) {
@@ -111,18 +120,28 @@ if (-not (Test-Path $vswhere)) {
     Fail 2 "vswhere.exe not found at $vswhere. Install Visual Studio 2026."
 }
 
-$vsInstall = & $vswhere -latest -products * `
-    -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
-    -property installationPath
+# vswhere component-ID filters (-requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64)
+# break between major VS generations (the ID was renamed in VS 18 / 2026). We instead
+# pick the latest install permissively and then validate VC presence by checking the
+# VC\Tools\MSVC directory — stable since VS 2017.
+$vsInstall = & $vswhere -all -prerelease -products * -property installationPath | Select-Object -First 1
 if (-not $vsInstall) {
-    Fail 2 "No Visual Studio install with VC tools (x86/x64) was found."
+    Fail 2 "No Visual Studio install was found by vswhere."
+}
+$vcToolsDir = Join-Path $vsInstall 'VC\Tools\MSVC'
+if (-not (Test-Path $vcToolsDir)) {
+    Fail 2 "Visual Studio at $vsInstall has no VC tools (missing $vcToolsDir). Open the VS Installer and add the Desktop development with C++ workload."
 }
 
-$msbuild = & $vswhere -latest -products * `
-    -requires Microsoft.Component.MSBuild `
-    -find "MSBuild\**\Bin\MSBuild.exe"
+# Same story for MSBuild discovery: drop -requires and just -find under the VS install.
+$msbuild = & $vswhere -all -prerelease -products * -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
 if (-not $msbuild -or -not (Test-Path $msbuild)) {
-    Fail 2 "MSBuild not found in any Visual Studio install."
+    # Last-resort: probe the canonical path under the located install.
+    $candidate = Join-Path $vsInstall 'MSBuild\Current\Bin\MSBuild.exe'
+    if (Test-Path $candidate) { $msbuild = $candidate }
+}
+if (-not $msbuild -or -not (Test-Path $msbuild)) {
+    Fail 2 "MSBuild.exe not found under $vsInstall."
 }
 
 Write-Host "VS install:  $vsInstall"
@@ -196,7 +215,16 @@ if (Test-Path $intDir) {
 }
 
 $exeArch = if ($Platform -eq 'x64') { 'x64' } else { 'x86' }
-$outExe = Join-Path $RepoRoot ("src\bin\{0}_{1}.exe" -f $Target, $exeArch)
+# Most binaries land at src\bin\<name>_<arch>.exe. PenCore is the odd one
+# out: it's a resource-only DLL emitted into src\bin\hamcore\PenCore.dll
+# (per its .vcxproj <OutputFile>) and has no arch suffix, since runtime
+# code references it as "|PenCore.dll" via ReadHamcore. Branch here so
+# the existence check and verification step downstream still work.
+if ($Target -eq 'PenCore') {
+    $outExe = Join-Path $RepoRoot 'src\bin\hamcore\PenCore.dll'
+} else {
+    $outExe = Join-Path $RepoRoot ("src\bin\{0}_{1}.exe" -f $Target, $exeArch)
+}
 if (Test-Path $outExe) {
     Remove-Item $outExe -Force
     Write-Host "Removed: $outExe"
