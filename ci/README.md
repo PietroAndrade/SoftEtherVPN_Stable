@@ -15,6 +15,7 @@ about reproducible automation.
 |---|---|
 | `build-binary.ps1` | Idempotent PowerShell script that builds **one** binary by name. Locates VS, SDK, sets env vars, cleans state, runs MSBuild, smoke-tests CLI binaries. Exit code 0 on success. |
 | `build-desktop-client.ps1` | Orchestrator that builds the **three** desktop-client binaries (`vpncmd`, `vpnclient`, `vpncmgr`) by calling `build-binary.ps1` for each. Reports a final per-binary status table. |
+| `install-local.ps1` | Deploys the built desktop-client trio to a local folder (default `%USERPROFILE%\SoftEtherVPN\`), copies `hamcore\`, writes convenience launchers, and optionally pre-stages the Neo6 virtual-NIC driver via `pnputil /add-driver` (self-elevates to admin if `-InstallDriver` is set). Non-destructive: no service registered, no Program Files write. Usage docs in [`../RUN_WINDOWS.md`](../RUN_WINDOWS.md). |
 | `README.md` | This file. Pipeline templates and runner-setup notes. |
 
 When new binaries (`vpnserver`, `vpnbridge`, …) are validated, just add

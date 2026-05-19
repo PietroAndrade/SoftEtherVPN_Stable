@@ -97,6 +97,12 @@ src/bin/BuildUtil*.config
 !src/bin/hamcore/
 !src/bin/hamcore/**
 
+# PenCore.dll IS a build output (resource-only DLL built from src/PenCore/)
+# even though it lives under hamcore/. Keep it out of source control — users
+# get it from `.\ci\build-binary.ps1 -Target PenCore`. The install-local.ps1
+# pre-flight warns if it is missing.
+src/bin/hamcore/PenCore.dll
+
 # -------------------------------------------------------------------------
 # Old VS project backups (some forks keep src/Backup/, src/<proj>/Backup/)
 # -------------------------------------------------------------------------
