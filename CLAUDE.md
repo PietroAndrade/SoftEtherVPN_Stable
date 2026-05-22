@@ -21,7 +21,8 @@ file is the source of truth for the Windows build.
 - **Solution file:** `src/SEVPN.sln` (already migrated to VS Format 12.00, "Visual Studio Version 18")
 - **Projects:** all `.vcxproj` files target `<PlatformToolset>v145</PlatformToolset>` (VS2026)
 - **Build tooling:** `src/BuildUtil/` is a small C# .NET Framework 4.8 program that orchestrates the official build pipeline and generates per-binary version resources via PreLinkEvent
-- **CI scripts:** `ci/build-binary.ps1` (generic), `ci/build-desktop-client.ps1` (orchestrator), `ci/README.md` (yaml templates)
+- **CI scripts:** `ci/build-binary.ps1` (generic), `ci/build-desktop-client.ps1` (orchestrator), `ci/install-local.ps1` (run-in-place dev deploy), `ci/installer.ps1` (full per-user installer/uninstaller), `ci/build-inno.ps1` (builds the Inno `setup.exe` from `installer/SoftEtherVPN.iss`), `ci/README.md` (yaml templates)
+- **Installer sources:** `installer/` holds the Inno script `SoftEtherVPN.iss` plus the `vpncmd.cmd` shim and self-elevating `install-driver.cmd` it bundles. Output goes to `dist/` (gitignored).
 - **Pre-built artifacts shipped in repo:**
   - `src/BuildFiles/Library/{Win32,x64}_{Debug,Release}/{libeay32,ssleay32,zlib,libintelaes}.lib` — OpenSSL, zlib, Intel AES-NI built against legacy CRT
   - `src/bin/hamcore/DriverPackages/` — pre-signed `.sys`/`.cat` for Neo, Neo6, SeLow (no WDK required to redistribute)
@@ -203,6 +204,18 @@ This is a living section — update it when major work changes.
 - [x] `RUN_WINDOWS.md` + `ci/install-local.ps1`: one-shot deployment to
   `%USERPROFILE%\SoftEtherVPN\`, Neo6 driver staging via pnputil,
   Memory-Integrity workaround documented, foreground-test launchers.
+- [x] `ci/installer.ps1`: full per-user installer/uninstaller to
+  `%LOCALAPPDATA%\Programs\SoftEtherVPN\` — Start Menu + Desktop shortcuts,
+  user `PATH` + `vpncmd` shim, Add/Remove Programs registration, and a
+  single self-elevating Neo6 driver step. Static-validated only (no Windows
+  host in the dev sandbox); still needs a real-machine smoke test. Does NOT
+  modify `install-local.ps1`. Docs in [`ci/README.md`](ci/README.md).
+- [x] `ci/build-inno.ps1` + `installer/SoftEtherVPN.iss`: Inno Setup packaging
+  into a single redistributable `dist\SoftEtherVPN-Client-Setup.exe` (per-user
+  wizard, EN + pt-BR, optional PATH + Neo6 driver finish-page steps). Builds
+  successfully on the dev's Win11 box (ISCC auto-located, incl. winget's
+  per-user `%LOCALAPPDATA%\Programs\Inno Setup 6\`). `dist/` is gitignored.
+  setup.exe is unsigned (SmartScreen warns until Authenticode-signed).
 - [ ] `vpnserver` / `vpnbridge` / `vpnsmgr` ports if server-side use
   case becomes needed
 - [ ] Rebuild OpenSSL with VS2026 to remove the legacy CRT shim
@@ -213,9 +226,10 @@ This is a living section — update it when major work changes.
 - Read [`BUILD_WINDOWS.md`](BUILD_WINDOWS.md) — it has prerequisites,
   applied patches, per-binary porting checklist, troubleshooting, and
   a status table.
-- Read [`ci/README.md`](ci/README.md) — it has the script usage,
-  GitHub Actions YAML, Azure Pipelines YAML, and self-hosted runner
-  setup notes.
+- Read [`ci/README.md`](ci/README.md) — it has the build + install script
+  usage (incl. `installer.ps1`, the Inno `build-inno.ps1` / `setup.exe`
+  flow, and the deploy-options comparison), GitHub Actions YAML, Azure
+  Pipelines YAML, and self-hosted runner setup notes.
 - For UX/runtime questions (how to install and use the built binaries
   on a target machine), read [`RUN_WINDOWS.md`](RUN_WINDOWS.md). It
   covers the `ci/install-local.ps1` flow, the Neo6 driver / Memory

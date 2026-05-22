@@ -16,6 +16,8 @@ about reproducible automation.
 | `build-binary.ps1` | Idempotent PowerShell script that builds **one** binary by name. Locates VS, SDK, sets env vars, cleans state, runs MSBuild, smoke-tests CLI binaries. Exit code 0 on success. |
 | `build-desktop-client.ps1` | Orchestrator that builds the **three** desktop-client binaries (`vpncmd`, `vpnclient`, `vpncmgr`) by calling `build-binary.ps1` for each. Reports a final per-binary status table. |
 | `install-local.ps1` | Deploys the built desktop-client trio to a local folder (default `%USERPROFILE%\SoftEtherVPN\`), copies `hamcore\`, writes convenience launchers, and optionally pre-stages the Neo6 virtual-NIC driver via `pnputil /add-driver` (self-elevates to admin if `-InstallDriver` is set). Non-destructive: no service registered, no Program Files write. Usage docs in [`../RUN_WINDOWS.md`](../RUN_WINDOWS.md). |
+| `installer.ps1` | Full **per-user installer/uninstaller** (the app itself never needs admin). Installs to `%LOCALAPPDATA%\Programs\SoftEtherVPN\`, copies binaries + `hamcore\`, creates Start Menu + Desktop shortcuts, adds the folder to the user `PATH` (+ a `vpncmd` shim), registers an Add/Remove Programs entry, and copies itself in so `-Uninstall` is self-contained. `-InstallDriver` stages Neo6 in a single self-elevating step. Use this for a "real" install; use `install-local.ps1` for quick run-in-place dev iteration. |
+| `build-inno.ps1` | Compiles `installer\SoftEtherVPN.iss` (Inno Setup) into a single self-contained `dist\SoftEtherVPN-Client-Setup.exe` that bundles the binaries + `hamcore\` and presents an install wizard. Auto-locates `ISCC.exe` (Program Files **or** winget's per-user `%LOCALAPPDATA%\Programs\Inno Setup 6\`, or the registry); `-InstallInno` installs Inno Setup via winget first. The Inno sources live in `installer\` (`SoftEtherVPN.iss`, `vpncmd.cmd`, `install-driver.cmd`). |
 | `README.md` | This file. Pipeline templates and runner-setup notes. |
 
 When new binaries (`vpnserver`, `vpnbridge`, …) are validated, just add
@@ -56,6 +58,71 @@ toolchain paths via `vswhere`. Useful flags:
 # Continue building remaining binaries even if one fails
 .\ci\build-desktop-client.ps1 -ContinueOnError
 ```
+
+---
+
+## Installing the built client
+
+There are three ways to get the binaries onto a workstation. All install
+**per-user** (no admin for the app itself) and register no Windows service.
+
+| | `install-local.ps1` | `installer.ps1` | Inno `setup.exe` |
+|---|---|---|---|
+| Kind | Run-in-place dev deploy | Per-user installer (script) | Per-user wizard installer |
+| Hand-off | needs the repo | needs the repo | single self-contained `.exe` |
+| Location | `%USERPROFILE%\SoftEtherVPN\` | `%LOCALAPPDATA%\Programs\SoftEtherVPN\` | `%LOCALAPPDATA%\Programs\SoftEtherVPN\` |
+| Launchers | `run-*.cmd` files | Start Menu + Desktop shortcuts | Start Menu + Desktop shortcuts |
+| PATH | not touched | adds folder + `vpncmd` shim | optional task (+ `vpncmd` shim) |
+| Add/Remove Programs | no | yes (HKCU) | yes (native Inno) |
+| Uninstall | delete the folder | `-Uninstall` / Settings → Apps | Settings → Apps / Start Menu |
+| Neo6 driver | `-InstallDriver` (self-elevates) | `-InstallDriver` (self-elevates) | optional finish-page step (self-elevates) |
+| Build tooling | none | none | Inno Setup (ISCC) |
+
+In all three, only the Neo6 driver step touches admin (it self-elevates); the
+file copy, shortcuts, PATH and registry writes stay in the user's context. On
+uninstall the driver is intentionally left in the store (remove it manually
+with `pnputil /delete-driver oem<n>.inf /uninstall`). The HVCI / Memory
+Integrity caveat in [`../RUN_WINDOWS.md`](../RUN_WINDOWS.md) applies to NIC
+creation regardless of which one you use.
+
+### `installer.ps1` (PowerShell installer)
+
+Run from a normal (non-admin) prompt. Pass `-ExecutionPolicy Bypass` because
+the binaries are unsigned:
+
+```powershell
+# Full install incl. Neo6 driver staging (the only UAC prompt is the driver)
+powershell -ExecutionPolicy Bypass -File .\ci\installer.ps1 -InstallDriver
+
+# App only; stage the driver later via the "Install Neo6 Driver (Admin)" shortcut
+powershell -ExecutionPolicy Bypass -File .\ci\installer.ps1
+
+# Custom folder / skip shortcuts or PATH
+powershell -ExecutionPolicy Bypass -File .\ci\installer.ps1 -DestinationPath C:\sevpn -NoShortcuts -NoPath
+
+# Uninstall (also available from Settings -> Apps)
+powershell -ExecutionPolicy Bypass -File .\ci\installer.ps1 -Uninstall
+```
+
+### Inno `setup.exe` (single redistributable installer)
+
+`ci\build-inno.ps1` compiles `installer\SoftEtherVPN.iss` into
+`dist\SoftEtherVPN-Client-Setup.exe` — one file that bundles the binaries +
+`hamcore\` and shows a normal install wizard (EN + pt-BR). Use this to hand
+the client to someone else.
+
+```powershell
+# Build the setup.exe (Inno Setup must already be installed)
+powershell -ExecutionPolicy Bypass -File .\ci\build-inno.ps1
+
+# Same, but install Inno Setup via winget first if ISCC.exe isn't found
+powershell -ExecutionPolicy Bypass -File .\ci\build-inno.ps1 -InstallInno
+```
+
+The compiler (`ISCC.exe`) is auto-located in Program Files, in the per-user
+`%LOCALAPPDATA%\Programs\Inno Setup 6\` (where winget installs it), or via the
+registry. The produced `setup.exe` is **unsigned**, so SmartScreen warns on
+first run ("More info" → "Run anyway") until it is Authenticode-signed.
 
 ---
 
